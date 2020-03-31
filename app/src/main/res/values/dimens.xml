@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="poster_movie_item_width">100dp</dimen>
+    <dimen name="poster_movie_item_height">100dp</dimen>
+    <dimen name="margin_default">8dp</dimen>
+    <dimen name="detail_margin_default">16dp</dimen>
+</resources>

@@ -2,7 +2,11 @@ package br.com.giovani.upcomingmovies.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -27,14 +31,16 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements UpcomingMoviesAdapter
-        .UpcomingMovieViewHolder.OnItemClickListener {
+        .UpcomingMovieViewHolder.OnItemClickListener, SearchView.OnQueryTextListener {
 
-    private List<Movie> mMovies = new ArrayList<>();
+    private static final int FIRST_PAGE = 1;
+    private List<Movie> mEntireMovieList = new ArrayList<>();
+    private List<Movie> mPartialMovieList = new ArrayList<>();
     private ConstraintLayout mProgressLayout;
-    private LinearLayoutManager mLayoutManager;
     private UpcomingMoviesAdapter mUpcomingMoviesAdapter;
-    private int mCurrentPage = 0;
     private List<Genre> mGenres;
+    private SearchView mSearchView;
+    private boolean mIsReadyToSearch = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,19 +51,41 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
         fetchGenres();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        final MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_search:
+                if (mSearchView.getVisibility() == View.GONE) {
+                    showSearchView();
+                } else {
+                    dismissSearchView();
+                }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void initViews() {
+        mSearchView = findViewById(R.id.search_view);
+        mSearchView.setOnQueryTextListener(this);
+
         final RecyclerView recyclerView = findViewById(R.id.movies_recycler_view);
         mProgressLayout = findViewById(R.id.progress_bar_layout);
-        mLayoutManager = new LinearLayoutManager(MainActivity.this);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
 
-        mUpcomingMoviesAdapter = new UpcomingMoviesAdapter(mMovies, this);
+        mUpcomingMoviesAdapter = new UpcomingMoviesAdapter(mEntireMovieList, this);
 
-        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mUpcomingMoviesAdapter);
-        recyclerView.addOnScrollListener(getOnScrollListener());
 
         final DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView
-                .getContext(), mLayoutManager.getOrientation());
+                .getContext(), layoutManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
     }
 
@@ -74,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
                         final GenresResponse genresResponse = response.body();
                         if (genresResponse != null) {
                             mGenres = genresResponse.getGenres();
-                            fetchUpcomingMovies();
+                            fetchUpcomingMovies(FIRST_PAGE);
                         }
                     }
                 }
@@ -89,22 +117,30 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
         }
     }
 
-    private void fetchUpcomingMovies() {
+    private void fetchUpcomingMovies(final int page) {
         showProgressBar();
-        mCurrentPage++;
 
-        new UpcomingMoviesCallBack(mCurrentPage) {
+        new UpcomingMoviesCallBack(page) {
             @Override
             public void onResponse(Call<UpcomingMoviesResponse> call,
                                    Response<UpcomingMoviesResponse> response) {
-                dismissProgressBar();
 
                 if (response.isSuccessful()) {
                     final UpcomingMoviesResponse upcomingMoviesResponse = response.body();
-                    if (upcomingMoviesResponse != null) {
-                        mMovies.addAll(upcomingMoviesResponse.getMovies());
+                    if (upcomingMoviesResponse != null &&
+                            page <= upcomingMoviesResponse.getTotalPages()) {
+
+                        mEntireMovieList.addAll(upcomingMoviesResponse.getMovies());
                         setMovieGenres();
-                        mUpcomingMoviesAdapter.updateMovies(mMovies);
+
+                        if (page == upcomingMoviesResponse.getTotalPages()) {
+                            dismissProgressBar();
+                            mUpcomingMoviesAdapter.updateMovies(mEntireMovieList);
+                            mPartialMovieList = mEntireMovieList;
+                            mIsReadyToSearch = true;
+                        } else {
+                            fetchUpcomingMovies(upcomingMoviesResponse.getPage() + 1);
+                        }
                     }
                 }
             }
@@ -119,28 +155,9 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
     }
 
     private void setMovieGenres() {
-        for (final Movie movie : mMovies) {
+        for (final Movie movie : mEntireMovieList) {
             movie.setGenres(mGenres);
         }
-    }
-
-    private RecyclerView.OnScrollListener getOnScrollListener() {
-        return new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                final int lastItemPosition = mLayoutManager.findLastVisibleItemPosition();
-
-                if (lastItemPosition >= mMovies.size() - 1 && dy > 0) {
-                    fetchUpcomingMovies();
-                }
-            }
-        };
     }
 
     private void showProgressBar() {
@@ -151,10 +168,45 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
         mProgressLayout.setVisibility(View.INVISIBLE);
     }
 
+    private void showSearchView() {
+        if (mIsReadyToSearch) {
+            mSearchView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void dismissSearchView() {
+        mSearchView.setVisibility(View.GONE);
+    }
+
     @Override
     public void onItemClick(int position) {
         final Intent intent = new Intent(this, MovieDetailActivity.class);
-        intent.putExtra(Constants.MOVIE_KEY, mMovies.get(position));
+        intent.putExtra(Constants.MOVIE_KEY, mPartialMovieList.get(position));
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        if (!s.trim().isEmpty()) {
+            searchMoviesByName(s);
+        } else {
+            mPartialMovieList = mEntireMovieList;
+        }
+        mUpcomingMoviesAdapter.updateMovies(mPartialMovieList);
+        return false;
+    }
+
+    private void searchMoviesByName(String text) {
+        mPartialMovieList = new ArrayList<>();
+        for (final Movie movie : mEntireMovieList) {
+            if (movie.getTitle().toLowerCase().trim().contains(text.toLowerCase())) {
+                mPartialMovieList.add(movie);
+            }
+        }
     }
 }

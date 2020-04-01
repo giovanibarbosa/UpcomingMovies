@@ -71,7 +71,7 @@ public class MovieDetailActivity extends AppCompatActivity implements RequestLis
             name.setText(mMovie.getTitle());
 
             genres.setText(String.format(getString(R.string.detail_genre_text), mMovie
-                    .buildGenreIdsString()));
+                    .formatGenres()));
 
             overview.setText(mMovie.getOverview());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

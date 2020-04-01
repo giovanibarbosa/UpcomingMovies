@@ -2,28 +2,33 @@ package br.com.giovani.upcomingmovies.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import br.com.giovani.upcomingmovies.utils.Constants;
 
 public class Movie implements Parcelable {
-    private static final String GENDER_LIST_SEP = ",";
     private List<Genre> genres;
+    private static final String GENRE_SEPARATOR = ", ";
 
     @Expose
     private double popularity;
 
-    @Expose @SerializedName("vote_count")
+    @Expose
+    @SerializedName("vote_count")
     private int voteCount;
 
     @Expose
     private boolean video;
 
-    @Expose @SerializedName("poster_path")
+    @Expose
+    @SerializedName("poster_path")
     private String posterPath;
 
     @Expose
@@ -32,28 +37,34 @@ public class Movie implements Parcelable {
     @Expose
     private boolean adult;
 
-    @Expose @SerializedName("backdrop_path")
+    @Expose
+    @SerializedName("backdrop_path")
     private String backdropPath;
 
-    @Expose @SerializedName("original_language")
+    @Expose
+    @SerializedName("original_language")
     private String originalLanguage;
 
-    @Expose @SerializedName("original_title")
+    @Expose
+    @SerializedName("original_title")
     private String originalTitle;
 
-    @Expose @SerializedName("genre_ids")
+    @Expose
+    @SerializedName("genre_ids")
     private List<Integer> genreIds;
 
     @Expose
     private String title;
 
-    @Expose @SerializedName("vote_average")
+    @Expose
+    @SerializedName("vote_average")
     private double voteAverage;
 
     @Expose
     private String overview;
 
-    @Expose @SerializedName("release_date")
+    @Expose
+    @SerializedName("release_date")
     private String releaseDate;
 
     public double getPopularity() {
@@ -168,34 +179,34 @@ public class Movie implements Parcelable {
         this.releaseDate = releaseDate;
     }
 
-    public String buildGenreIdsString() {
-        if (genreIds == null || genreIds.isEmpty()) {
-            return "";
-        }
-
-        final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(genreIds.get(0));
-        for (int i = 1; i < genreIds.size(); i++) {
-            stringBuilder.append(GENDER_LIST_SEP).append(genreIds.get(i));
-        }
-        return stringBuilder.toString();
-    }
-
-    public void addGenreIdsList(String ids) {
-        if (!TextUtils.isEmpty(ids)) {
-            genreIds = new ArrayList<>();
-            final String[] genreStrings = ids.split(GENDER_LIST_SEP);
-            for (final String genreStr : genreStrings)
-                genreIds.add(Integer.parseInt(genreStr));
-        }
-    }
-
     public List<Genre> getGenres() {
         return genres;
     }
 
     public void setGenres(List<Genre> genres) {
-        this.genres = genres;
+        this.genres = new ArrayList<>();
+
+        for (final Genre genre : genres) {
+            for (final int id : getGenreIds()) {
+                if (genre.getId() == id) {
+                    this.genres.add(genre);
+                }
+            }
+        }
+    }
+
+    public String formatGenres() {
+        final StringBuilder builder = new StringBuilder();
+        if (genres != null && !genres.isEmpty()) {
+            for (int i = 0; i < genres.size(); i++) {
+                if (i == 0) {
+                    builder.append(genres.get(i).getName());
+                } else {
+                    builder.append(GENRE_SEPARATOR).append(genres.get(i).getName());
+                }
+            }
+        }
+        return builder.toString();
     }
 
 

@@ -16,9 +16,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import br.com.giovani.upcomingmovies.R;
 import br.com.giovani.upcomingmovies.adapter.UpcomingMoviesAdapter;
+import br.com.giovani.upcomingmovies.model.Genre;
+import br.com.giovani.upcomingmovies.model.GenresResponse;
 import br.com.giovani.upcomingmovies.model.Movie;
 import br.com.giovani.upcomingmovies.model.UpcomingMoviesResponse;
 import br.com.giovani.upcomingmovies.utils.Constants;
+import br.com.giovani.upcomingmovies.webservice.GenresCallBack;
 import br.com.giovani.upcomingmovies.webservice.UpcomingMoviesCallBack;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -31,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
     private LinearLayoutManager mLayoutManager;
     private UpcomingMoviesAdapter mUpcomingMoviesAdapter;
     private int mCurrentPage = 0;
+    private List<Genre> mGenres;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
         setContentView(R.layout.activity_main);
         initViews();
 
-        fetchUpcomingMovies();
+        fetchGenres();
     }
 
     private void initViews() {
@@ -57,6 +61,34 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
         recyclerView.addItemDecoration(dividerItemDecoration);
     }
 
+    private void fetchGenres() {
+        showProgressBar();
+
+        if (mGenres == null) {
+            new GenresCallBack() {
+                @Override
+                public void onResponse(Call<GenresResponse> call,
+                                       Response<GenresResponse> response) {
+                    dismissProgressBar();
+                    if (response.isSuccessful()) {
+                        final GenresResponse genresResponse = response.body();
+                        if (genresResponse != null) {
+                            mGenres = genresResponse.getGenres();
+                            fetchUpcomingMovies();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<GenresResponse> call, Throwable t) {
+                    dismissProgressBar();
+                    Toast.makeText(MainActivity.this, R.string.on_failure_message, Toast
+                            .LENGTH_LONG).show();
+                }
+            };
+        }
+    }
+
     private void fetchUpcomingMovies() {
         showProgressBar();
         mCurrentPage++;
@@ -71,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
                     final UpcomingMoviesResponse upcomingMoviesResponse = response.body();
                     if (upcomingMoviesResponse != null) {
                         mMovies.addAll(upcomingMoviesResponse.getMovies());
+                        setMovieGenres();
                         mUpcomingMoviesAdapter.updateMovies(mMovies);
                     }
                 }
@@ -83,6 +116,12 @@ public class MainActivity extends AppCompatActivity implements UpcomingMoviesAda
                         .LENGTH_LONG).show();
             }
         };
+    }
+
+    private void setMovieGenres() {
+        for (final Movie movie : mMovies) {
+            movie.setGenres(mGenres);
+        }
     }
 
     private RecyclerView.OnScrollListener getOnScrollListener() {

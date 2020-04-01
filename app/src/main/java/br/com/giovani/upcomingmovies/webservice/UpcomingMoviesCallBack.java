@@ -23,6 +23,8 @@ public abstract class UpcomingMoviesCallBack implements Callback<UpcomingMoviesR
         call.enqueue(this);
     }
 
+
+
     @Override
     public abstract void onResponse(Call<UpcomingMoviesResponse> call,
                                     Response<UpcomingMoviesResponse> response);

@@ -22,7 +22,8 @@ public class UpcomingMoviesAdapter extends RecyclerView
     private List<Movie> mMovies;
     private UpcomingMovieViewHolder.OnItemClickListener mOnclickListenerItem;
 
-    public UpcomingMoviesAdapter(List<Movie> movies, UpcomingMovieViewHolder.OnItemClickListener onItemClickListener) {
+    public UpcomingMoviesAdapter(List<Movie> movies, UpcomingMovieViewHolder
+            .OnItemClickListener onItemClickListener) {
         mMovies = movies;
         mOnclickListenerItem = onItemClickListener;
     }
@@ -44,7 +45,7 @@ public class UpcomingMoviesAdapter extends RecyclerView
                 .placeholder(android.R.color.darker_gray)
                 .into(holder.posterImageView);
         holder.nameTextView.setText(movie.getTitle());
-//        holder.genreTextView.setText(movie.getTitle());
+        holder.genreTextView.setText(movie.formatGenres());
         holder.releaseDateTextView.setText(movie.getReleaseDate());
     }
 

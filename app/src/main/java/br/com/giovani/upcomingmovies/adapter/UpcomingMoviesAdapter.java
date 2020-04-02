@@ -15,9 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import br.com.giovani.upcomingmovies.R;
 import br.com.giovani.upcomingmovies.model.Movie;
 import br.com.giovani.upcomingmovies.utils.Constants;
+import br.com.giovani.upcomingmovies.utils.ImageUrlBuilder;
 
-public class UpcomingMoviesAdapter extends RecyclerView
-        .Adapter<UpcomingMoviesAdapter.UpcomingMovieViewHolder> {
+public class UpcomingMoviesAdapter extends RecyclerView.Adapter<UpcomingMoviesAdapter
+        .UpcomingMovieViewHolder>{
 
     private List<Movie> mMovies;
     private UpcomingMovieViewHolder.OnItemClickListener mOnclickListenerItem;
@@ -41,8 +42,11 @@ public class UpcomingMoviesAdapter extends RecyclerView
         final Movie movie = mMovies.get(position);
 
         Glide.with(holder.itemView)
-                .load(Constants.IMAGE_BASE_URL + movie.getBackdropPath())
-                .placeholder(android.R.color.darker_gray)
+                .load(ImageUrlBuilder.getInstance()
+                        .build(Constants.IMAGE_BASE_URL,
+                                ImageUrlBuilder.ORIGINAL,
+                                movie.getBackdropPath()))
+                .placeholder(R.mipmap.broken_image)
                 .into(holder.posterImageView);
         holder.nameTextView.setText(movie.getTitle());
         holder.genreTextView.setText(movie.formatGenres());

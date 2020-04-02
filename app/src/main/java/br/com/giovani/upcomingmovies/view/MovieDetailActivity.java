@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import br.com.giovani.upcomingmovies.R;
 import br.com.giovani.upcomingmovies.model.Movie;
 import br.com.giovani.upcomingmovies.utils.Constants;
+import br.com.giovani.upcomingmovies.utils.ImageUrlBuilder;
 
 import static android.text.Layout.JUSTIFICATION_MODE_INTER_WORD;
 
@@ -61,11 +62,13 @@ public class MovieDetailActivity extends AppCompatActivity implements RequestLis
         showProgressBar();
 
         if (mMovie != null) {
-            Glide
-                    .with(this)
-                    .load(Constants.IMAGE_BASE_URL + mMovie.getPosterPath())//TODO change the base image url
+            Glide.with(this)
+                    .load(ImageUrlBuilder.getInstance()
+                            .build(Constants.IMAGE_BASE_URL,
+                                    ImageUrlBuilder.ORIGINAL,
+                                    mMovie.getPosterPath()))
                     .addListener(this)
-                    .placeholder(android.R.color.darker_gray)
+                    .placeholder(R.mipmap.broken_image)
                     .into(poster);
 
             name.setText(mMovie.getTitle());

@@ -6,7 +6,7 @@
         android:id="@+id/menu_search"
         android:checkable="false"
         android:enabled="true"
-        android:icon="@mipmap/baseline_search_white_24"
+        android:icon="@mipmap/search"
         android:title="@string/search_menu_item_title"
         android:visible="true"
         app:showAsAction="ifRoom" />

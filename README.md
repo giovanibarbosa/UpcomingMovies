@@ -21,5 +21,5 @@ This app uses [The Movie Database API ³](https://www.themoviedb.org/documentati
 
 ## Libraries
 
-* [Retrofit](https://square.github.io/retrofit/)
-* [Glide](https://github.com/bumptech/glide)
+* [Retrofit](https://square.github.io/retrofit/): To handle http requests
+* [Glide](https://github.com/bumptech/glide): To handle image requests

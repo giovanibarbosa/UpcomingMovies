@@ -13,4 +13,6 @@ public interface MoviesApiService {
 
     @GET("genre/movie/list")
     Call<GenresResponse> fetchGenres(@Query("api_key") String apiKey);
+
+
 }

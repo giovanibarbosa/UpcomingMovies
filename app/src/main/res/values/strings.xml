@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Upcoming Movies</string>
+    <string name="on_failure_message">Cannot fetch the data</string>
+    <string name="poster_image_description">Movie Poster</string>
+    <string name="no_movie_displayed">No movie to be displayed</string>
+    <string name="detail_release_date_text">Release Date: %s</string>
+    <string name="detail_name_text">Title: %s</string>
+    <string name="detail_genre_text">Genre(s): %s</string>
+    <string name="search_menu_item_title">Search</string>
+    <string name="search_view_hint">Search for movie name</string>
+</resources>

@@ -14,10 +14,9 @@ This app runs over the Android 4.4 (API level 19) or later versions.
 This app uses [The Movie Database API ³](https://www.themoviedb.org/documentation/api) API to retrieve movies.
 
 ## Screens
-
-![screen](./screenshots/movie-list.png)
-
-![screen](./screenshots/movie-detail.png)
+| Movie List | Movie Detail |
+| --- | --- |
+| <img src='./screenshots/movie-list.png' width=250> | <img src='./screenshots/movie-detail.png' width=250> |
 
 ## Libraries
 
